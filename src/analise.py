@@ -15,113 +15,140 @@ class PGNAnalyzer:
         if not moves or len(moves) < 2:
             return "Partida muito curta"
 
-        # Dicionário de aberturas baseado nos primeiros lances
-        opening_patterns = {
-            # Aberturas com e4
-            ('e2e4', 'e7e5'): {
-                ('g1f3', 'b8c6', 'f1b5'): "Ruy Lopez",
-                ('g1f3', 'b8c6', 'f1c4'): "Italian Game",
-                ('g1f3', 'b8c6', 'd2d3'): "King's Indian Attack",
-                ('g1f3', 'g8f6'): "Petroff Defense",
-                ('f2f4',): "King's Gambit",
-                ('b1c3',): "Vienna Game",
-                ('d2d4',): "Center Game"
-            },
-            ('e2e4', 'c7c5'): {
-                ('g1f3', 'd7d6', 'd2d4'): "Sicilian Najdorf",
-                ('g1f3', 'b8c6', 'd2d4'): "Sicilian Accelerated Dragon",
-                ('g1f3', 'g8f6'): "Sicilian Nimzowitsch",
-                ('b1c3',): "Sicilian Closed",
-                ('f2f4',): "Sicilian Grand Prix",
-                ('c2c3',): "Sicilian Alapin"
-            },
-            ('e2e4', 'c7c6'): "Caro-Kann Defense",
-            ('e2e4', 'd7d6'): "Pirc Defense",
-            ('e2e4', 'g8f6'): "Alekhine's Defense",
-            ('e2e4', 'd7d5'): "Scandinavian Defense",
-            ('e2e4', 'g7g6'): "Modern Defense",
-            ('e2e4', 'e7e6'): "French Defense",
-
-            # Aberturas com d4
-            ('d2d4', 'd7d5'): {
-                ('c2c4',): "Queen's Gambit",
-                ('g1f3', 'g8f6', 'c2c4'): "Queen's Gambit Declined",
-                ('g1f3', 'g8f6', 'b1c3'): "Queen's Pawn Game",
-                ('e2e3',): "Colle System"
-            },
-            ('d2d4', 'g8f6'): {
-                ('c2c4', 'e7e6'): "Nimzo-Indian Defense",
-                ('c2c4', 'g7g6'): "King's Indian Defense",
-                ('g1f3', 'g7g6'): "King's Indian Attack",
-                ('b1c3', 'd7d5'): "Queen's Gambit Declined"
-            },
-            ('d2d4', 'f7f5'): "Dutch Defense",
-            ('d2d4', 'e7e6'): "Queen's Pawn Game",
-
-            # Aberturas com Nf3
-            ('g1f3', 'd7d5'): "Réti Opening",
-            ('g1f3', 'g8f6'): {
-                ('c2c4',): "English Opening",
-                ('d2d4',): "Queen's Pawn Game",
-                ('g2g3',): "King's Indian Attack"
-            },
-            ('g1f3', 'c7c5'): "Réti Opening",
-
-            # English Opening
-            ('c2c4', 'e7e5'): "English Opening",
-            ('c2c4', 'g8f6'): "English Opening",
-            ('c2c4', 'c7c5'): "English Symmetrical",
-
-            # Outras aberturas
-            ('f2f4',): "Bird's Opening",
-            ('b2b3',): "Nimzowitsch-Larsen Attack",
-            ('g2g3',): "Benko's Opening",
-            ('b1c3',): "Van't Kruijs Opening"
-        }
-
-        # Converter moves UCI para formato legível
         try:
-            # Pegar os primeiros 6 lances (3 de cada lado)
-            first_moves = tuple(moves[:6])
-
-            # Buscar padrão exato
-            for pattern, opening in opening_patterns.items():
-                if isinstance(opening, dict):
-                    # Verificar se os primeiros lances batem
-                    if len(first_moves) >= len(pattern) and first_moves[:len(pattern)] == pattern:
-                        # Verificar continuações
-                        remaining_moves = first_moves[len(pattern):]
-                        for continuation, name in opening.items():
-                            if len(remaining_moves) >= len(continuation) and remaining_moves[
-                                                                             :len(continuation)] == continuation:
-                                return name
-                        # Se não encontrou continuação específica, usar abertura geral
-                        return list(opening.values())[0] if opening else "Unknown Variation"
-                else:
-                    # Padrão simples
-                    if len(first_moves) >= len(pattern) and first_moves[:len(pattern)] == pattern:
-                        return opening
-
-            # Identificação por primeiro lance apenas
+            # Primeiro lance sempre determina a família de abertura
             first_move = moves[0] if moves else ""
+            second_move = moves[1] if len(moves) > 1 else ""
+
+            # Identificação por primeiro lance
             if first_move == 'e2e4':
-                second_move = moves[1] if len(moves) > 1 else ""
                 if second_move == 'e7e5':
+                    # Terceiro lance das brancas
+                    if len(moves) >= 3:
+                        third_move = moves[2]
+                        if third_move == 'g1f3':
+                            # Quarto lance das pretas
+                            if len(moves) >= 4:
+                                fourth_move = moves[3]
+                                if fourth_move == 'b8c6':
+                                    # Quinto lance das brancas determina
+                                    if len(moves) >= 5:
+                                        fifth_move = moves[4]
+                                        if fifth_move == 'f1b5':
+                                            return "Ruy Lopez"
+                                        elif fifth_move == 'f1c4':
+                                            return "Italian Game"
+                                        elif fifth_move == 'd2d3':
+                                            return "King's Indian Attack"
+                                    return "King's Knight Opening"
+                                elif fourth_move == 'g8f6':
+                                    return "Petroff Defense"
+                            return "King's Knight Opening"
+                        elif third_move == 'f2f4':
+                            return "King's Gambit"
+                        elif third_move == 'b1c3':
+                            return "Vienna Game"
+                        elif third_move == 'd2d4':
+                            return "Center Game"
                     return "King's Pawn Game"
                 elif second_move == 'c7c5':
+                    if len(moves) >= 3:
+                        third_move = moves[2]
+                        if third_move == 'g1f3':
+                            if len(moves) >= 5 and moves[4] == 'd2d4':
+                                return "Sicilian Najdorf"
+                            return "Sicilian Defense"
+                        elif third_move == 'b1c3':
+                            return "Sicilian Closed"
+                        elif third_move == 'f2f4':
+                            return "Sicilian Grand Prix"
+                        elif third_move == 'c2c3':
+                            return "Sicilian Alapin"
                     return "Sicilian Defense"
+                elif second_move == 'c7c6':
+                    return "Caro-Kann Defense"
+                elif second_move == 'd7d6':
+                    return "Pirc Defense"
+                elif second_move == 'g8f6':
+                    return "Alekhine's Defense"
+                elif second_move == 'd7d5':
+                    return "Scandinavian Defense"
+                elif second_move == 'g7g6':
+                    return "Modern Defense"
+                elif second_move == 'e7e6':
+                    return "French Defense"
                 else:
                     return "King's Pawn Opening"
+
             elif first_move == 'd2d4':
-                return "Queen's Pawn Opening"
+                if second_move == 'd7d5':
+                    if len(moves) >= 3 and moves[2] == 'c2c4':
+                        return "Queen's Gambit"
+                    elif len(moves) >= 3 and moves[2] == 'g1f3':
+                        return "Queen's Pawn Game"
+                    elif len(moves) >= 3 and moves[2] == 'e2e3':
+                        return "Colle System"
+                    return "Queen's Pawn Game"
+                elif second_move == 'g8f6':
+                    if len(moves) >= 4:
+                        third_move = moves[2]
+                        fourth_move = moves[3]
+                        if third_move == 'c2c4':
+                            if fourth_move == 'e7e6':
+                                return "Nimzo-Indian Defense"
+                            elif fourth_move == 'g7g6':
+                                return "King's Indian Defense"
+                        elif third_move == 'g1f3' and fourth_move == 'g7g6':
+                            return "King's Indian Attack"
+                    return "Indian Defense"
+                elif second_move == 'f7f5':
+                    return "Dutch Defense"
+                elif second_move == 'e7e6':
+                    return "Queen's Pawn Game"
+                else:
+                    return "Queen's Pawn Opening"
+
             elif first_move == 'g1f3':
-                return "Réti Opening"
+                if second_move == 'd7d5':
+                    return "Réti Opening"
+                elif second_move == 'g8f6':
+                    if len(moves) >= 3:
+                        third_move = moves[2]
+                        if third_move == 'c2c4':
+                            return "English Opening"
+                        elif third_move == 'd2d4':
+                            return "Queen's Pawn Game"
+                        elif third_move == 'g2g3':
+                            return "King's Indian Attack"
+                    return "Réti Opening"
+                elif second_move == 'c7c5':
+                    return "English Opening"
+                else:
+                    return "Réti Opening"
+
             elif first_move == 'c2c4':
-                return "English Opening"
+                if second_move == 'e7e5':
+                    return "English Opening"
+                elif second_move == 'g8f6':
+                    return "English Opening"
+                elif second_move == 'c7c5':
+                    return "English Symmetrical"
+                else:
+                    return "English Opening"
+
+            elif first_move == 'f2f4':
+                return "Bird's Opening"
+            elif first_move == 'b2b3':
+                return "Nimzowitsch-Larsen Attack"
+            elif first_move == 'g2g3':
+                return "Benko's Opening"
+            elif first_move == 'b1c3':
+                return "Van't Kruijs Opening"
             else:
                 return "Irregular Opening"
 
-        except Exception:
+        except Exception as e:
+            print(f"Erro na identificação de abertura: {e}")
             return "Unknown Opening"
 
     def parse_pgn(self):
@@ -736,12 +763,19 @@ class PGNAnalyzer:
         print(f"• Sacrifícios de dama: {queen_sacrifices}")
         print()
 
-        # 13. Top oponentes derrotados (original)
+        # 13. Top oponentes derrotados - CORRIGIDO PARA 20
         top_defeated = self.get_top_defeated_opponents()
         print("👑 TOP 20 MAIORES RATINGS DERROTADOS:")
-        for i, opponent in enumerate(top_defeated[:20], 1):  # Garantir 20
+
+        # Debug: verificar quantos oponentes temos
+        total_opponents = len(top_defeated)
+        print(f"DEBUG: Total de oponentes derrotados encontrados: {total_opponents}")
+
+        # Mostrar até 20 ou quantos tiverem disponível
+        for i, opponent in enumerate(top_defeated[:20], 1):
+            year_info = f"Ano: {opponent['year']} - " if opponent['year'] != 'N/A' else ""
             print(f"{i:2d}. {opponent['opponent']} ({opponent['rating']}) - "
-                  f"Ano: {opponent['year']} - Abertura: {opponent['opening']}")
+                  f"{year_info}Abertura: {opponent['opening']}")
         print()
 
         print("=" * 80)
