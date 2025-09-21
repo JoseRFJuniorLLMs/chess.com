@@ -1,6 +1,6 @@
 import requests
 
-# Usuário no Chess.com
+# Usuário no Chess.com https://api.chess.com/pub/player/juniorsatanas/games/archives
 username = "juniorsatanas"
 
 # Lista completa de todos os meses (2012 até 2025)
