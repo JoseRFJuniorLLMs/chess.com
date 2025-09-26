@@ -39,10 +39,10 @@ class ChessComDownloader:
             elif response.status_code == 403:
                 print("❌ Acesso negado (403) - A API pode estar bloqueando requisições")
                 print("💡 SOLUÇÃO ALTERNATIVA:")
-                print("   1. Acesse: https://www.chess.com/member/steniosousa")
+                print("   1. Acesse: https://www.chess.com/member/p1mbs")
                 print("   2. Vá para a aba 'Games'")
                 print("   3. Clique em 'Download' e baixe o arquivo PGN")
-                print("   4. Use o método: analyze_from_pgn_file('arquivo.pgn', 'steniosousa')")
+                print("   4. Use o método: analyze_from_pgn_file('arquivo.pgn', 'juniorsatanas')")
                 return []
             elif response.status_code == 404:
                 print("❌ Usuário não encontrado (404)")
@@ -79,7 +79,7 @@ class ChessComDownloader:
             print(f"❌ Erro ao baixar: {e}")
             return []
 
-    def download_recent_games(self, months=6):
+    def download_recent_games(self, months=100):
         """Baixa jogos dos últimos N meses"""
         print(f"🔄 Baixando jogos dos últimos {months} meses para {self.username}...")
 
@@ -92,7 +92,7 @@ class ChessComDownloader:
             print("2. Clique na aba 'Games' ou 'Partidas'")
             print("3. Clique no botão 'Download' (ícone de seta para baixo)")
             print("4. Baixe o arquivo .pgn")
-            print("5. Execute: analyze_from_pgn_file('arquivo.pgn', 'steniosousa')")
+            print("5. Execute: analyze_from_pgn_file('arquivo.pgn', 'juniorsatanas')")
             print("=" * 60)
             return []
 
@@ -649,7 +649,7 @@ class PGNAnalyzer:
         print("=" * 80)
 
 
-def analyze_player_from_chesscom(username, months=6):
+def analyze_player_from_chesscom(username, months=100):
     """
     Baixa e analisa partidas de um jogador do Chess.com
 
@@ -715,10 +715,10 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         username = sys.argv[1]
-        months = int(sys.argv[2]) if len(sys.argv) > 2 else 6
+        months = int(sys.argv[2]) if len(sys.argv) > 2 else 100
     else:
-        username = "steniosousa"  # Padrão
-        months = 6
+        username = "juniorsatanas"  # Padrão
+        months = 100
 
     print("🔍 ANALISADOR COMPLETO DE XADREZ")
     print("=" * 50)
